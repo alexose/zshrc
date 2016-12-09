@@ -1,0 +1,73 @@
+alias getdigits="ssh pi@aws -p24819 'working'"
+alias getdigits_loop="while true; do ( ssh pi@pi 'debug'; scp pi@pi:~/output.png ./ && open output.png); sleep 60; done;"
+alias getdigits_debug="ssh pi@pi 'working' || scp pi@pi:~/output.png ./ && open output.png"
+
+alias kexp="mplayer http://live-aacplus-64.kexp.org/kexp64.aac"
+
+function sshcp { cat ~/.ssh/id_rsa.pub | ssh $1 'cat >> .ssh/authorized_keys' }
+
+# Prep SD card to be mounted in virtualbox
+function sd {
+  sudo umount /dev/disk$1*
+  sudo VBoxManage internalcommands createrawvmdk -filename ./sd-card$2.vmdk -rawdisk /dev/disk$1
+  sudo chmod 777 /dev/disk$1
+  sudo chmod 777 ./sd-card$2.vmdk
+  sudo umount /dev/disk$1*
+}
+
+# Git quick merge helpers
+function ad { git checkout --theirs $1 && git add $1 }
+function ao { git checkout --ours $1 && git add $1 }
+function cn { electron /Users/alexose/getvpn/getvpn.js $1 }
+function rc { electron /Users/alexose/getvpn/dcps/getlogin.js }
+function am { /Users/alexose/getvpn/dcps/automatic.sh }
+
+alias gp="git checkout master && git pull"
+alias co="git rebase --continue"
+alias st="git status"
+alias pl="git pull --rebase"
+
+# Git pretty log
+alias gl="git log --pretty=format:'%C(yellow)%h %Cred%ad %Cblue%an%Cgreen%d %Creset%s' --date=short | less -R"
+# Git autocompletion
+# via https://github.com/git/git/tree/master/contrib/completion
+source ~/.git-completion.sh
+
+# github
+function new_github_repo(){
+    if [ -z "$1" ]
+        then
+            echo "Usage: github [name]"
+        else
+            USER='alexose'
+            curl -u "$USER" https://api.github.com/user/repos -d '{"name":"'$1'"}'
+            cd ~
+            mkdir $1
+            cd $1
+            touch README.md
+            git init
+            git add -A
+            git commit -am "Initial commit."
+            git remote add origin git@github.com:$USER/$1.git
+            git push origin master
+    fi
+}
+alias github='new_github_repo'
+alias stats='git shortlog -sn --since yesterday'
+
+alias c1="echo -ne '\x55\x55\xaa\xaa\x00\x00\x00\x00\x00\x00\x00\x50' | netcat -w 600 192.168.88.180 8000 | mplayer -vo gl:backend=4:glfinish -fps 25 -demuxer h264es -"
+alias c2="echo -ne '\x55\x55\xaa\xaa\x00\x00\x00\x00\x00\x00\x00\x50' | netcat -w 600 192.168.88.141 8000 | mplayer -vo gl:backend=4:glfinish -fps 25 -demuxer h264es -"
+function cx(){ mplayer -vo gl:backend=4:glfinish -fps 25 -demuxer h264es $1 }
+function pf(){ peerflix -x 24816 $1 --vlc }
+function pfm(){ peerflix -x 24816 $1 --mplayer }
+
+alias vlc='/Applications/VLC.app/Contents/MacOS/VLC'
+alias temptun='ssh pi@54.208.26.192 -p30000'
+
+alias temp='ssh pi@shop ./temp-safe.py'
+
+# Show listening ports
+alias ports='sudo lsof -iTCP -sTCP:LISTEN -n -P'
+
+alias last20='ssh maalox@kali 'tail -c 2000000 ./dogs.mp3' > dogs.mp3'
+function e2e(){ npm --silent run test:e2e -- $1 | grep ✖ 2>/dev/null }
